@@ -1,7 +1,6 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { GetProductById } from "@/features/api/products/product.query";
-import { LayoutsWithHeaderAndFooter } from "@/providers/NavbarAndFooter";
 import { Loader2, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,7 +41,7 @@ export function ProductDetailsPage() {
   const mainImage = selectedVariant?.image[0].url;
 
   return (
-    <LayoutsWithHeaderAndFooter className="mt-[80px] ">
+    <>
       <section className=" container  mx-auto px-4 py-8 md:py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Product Image */}
@@ -144,7 +143,7 @@ export function ProductDetailsPage() {
         product={data}
         selectedVariant={selectedVariant}
       />
-    </LayoutsWithHeaderAndFooter>
+    </>
   );
 }
 

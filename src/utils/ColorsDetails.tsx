@@ -1,23 +1,19 @@
 import { cn } from "@/lib/utils";
 
 const colorMap: { [key: string]: string } = {
-  // Warna tunggal
   Black: "#000000",
   White: "#FFFFFF",
 
-  // Warna campuran
   "Black/Cement Grey": "linear-gradient(45deg, #000000 50%, #8C8C8C 50%)",
-  "White/White": "#FFFFFF", // Atau gradient putih
+  "White/White": "#FFFFFF",
   "Sail/Light Orewood Brown/White/Black":
     "linear-gradient(45deg, #F5F5F5 25%, #D2B48C 25% 50%, #FFFFFF 50% 75%, #000000 75%)",
 };
 function getColorDisplay(colorString: string) {
-  // Coba cocokkan dengan peta warna persis
   if (colorMap[colorString]) {
     return colorMap[colorString];
   }
 
-  // Jika tidak cocok, gunakan warna pertama
   const colors = colorString.split("/");
   return colorMap[colors[0]] || "#CCCCCC";
 }

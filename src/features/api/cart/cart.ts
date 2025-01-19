@@ -1,11 +1,15 @@
 import { BASE_URL } from "@/constants";
 import { useAuth } from "@/hooks/auth/userAuthStore";
-import { CartDto } from "@/types/cart";
+import { CartData, CartDto } from "@/types/cart";
+import { API_RESPONSE } from "@/types/interfaces";
 import { Api } from "@/utils/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 const api = new Api();
+interface CountCart {
+  items: number;
+}
 
 export function useAddToCart() {
   const queryClient = useQueryClient();
@@ -34,21 +38,52 @@ export function useAddToCart() {
   });
 }
 
-export function useGetCart() {
+export function useGetCountCart() {
   const { user } = useAuth();
-  return useQuery({
-    queryKey: ["cart"],
+  const { data, isLoading, error } = useQuery<API_RESPONSE<CountCart>>({
+    queryKey: ["cart", "count"],
     queryFn: async () => {
-      const req = await api.get("/cart");
+      const req = await api.get<API_RESPONSE<CountCart>>("/cart/count");
       return req.data;
     },
     enabled: !!user?.id,
     staleTime: 1 * 24 * 60 * 60 * 1000,
     gcTime: 2 * 24 * 60 * 60 * 1000,
-    retry: 1,
+    retry: false,
     refetchOnWindowFocus: false,
-    select: (data: any) => data.data,
   });
+
+  if (data?.data.items === 0) {
+    return null;
+  }
+
+  return {
+    isLoading,
+    count: data?.data.items as number,
+    error,
+  };
+}
+
+export function useGetCart() {
+  const { user } = useAuth();
+  const { data, isLoading, error } = useQuery<API_RESPONSE<CartData>>({
+    queryKey: ["cart"],
+    queryFn: async () => {
+      const req = await api.get<API_RESPONSE<CartData>>("/cart");
+      return req.data;
+    },
+    enabled: !!user?.id,
+    staleTime: 1 * 24 * 60 * 60 * 1000,
+    gcTime: 2 * 24 * 60 * 60 * 1000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+
+  return {
+    cart: data?.data,
+    isLoading,
+    error,
+  };
 }
 
 export function useRemoveCartItems() {

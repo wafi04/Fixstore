@@ -27,6 +27,7 @@ export function ModalAddToCart({
   const { count, increase, decrease, total, size } = useCart();
 
   const addToCart = useAddToCart();
+  console.log(count);
 
   const onSubmit = () => {
     addToCart.mutate({

@@ -9,8 +9,8 @@ function App() {
   return (
     <>
       <Banner />
-      <FeaturedCollection />
-      <Categories />
+      {/* <FeaturedCollection />
+      <Categories /> */}
     </>
   );
 }

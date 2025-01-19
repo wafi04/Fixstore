@@ -1,15 +1,25 @@
-import { CategoryForm } from "@/types/categories";
+import { BASE_URL } from "@/constants";
+import { CategoryData, CategoryForm } from "@/types/categories";
 import { API_RESPONSE } from "@/types/interfaces";
+import { Api } from "@/utils/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
 import { toast } from "sonner";
-import { CategoriesService } from "./categories.crud";
-
-const category = new CategoriesService();
+const api = new Api();
 export function useCreateCategory() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["category", "crud"],
-    mutationFn: (data: CategoryForm) => category.create(data),
+    mutationFn: async (data: FormData) => {
+      const req = await axios.post(`${BASE_URL}/api/category`, data, {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      return req.data;
+    },
     onSuccess: () => {
       toast.success("create Categories success");
       queryClient.invalidateQueries({ queryKey: ["category", "crud"] });
@@ -24,7 +34,11 @@ export function useCreateCategory() {
 export function useGetCategory() {
   const { data, error, isLoading } = useQuery({
     queryKey: ["category", "crud"],
-    queryFn: () => category.getCategory(),
+    queryFn: async () => {
+      const req = await api.get<API_RESPONSE<CategoryData[]>>("/api/category");
+
+      return req.data;
+    },
     staleTime: 6 * 10 * 60,
     retry: false,
     select: (response) => response.data || [],
@@ -35,12 +49,15 @@ export function useGetCategory() {
     isLoading,
   };
 }
-export function useUpdateCategory() {
+export function useUpdateCategory(id: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationKey: ["category", "crud"],
-    mutationFn: (data: CategoryForm) => category.updateCategory(data),
+    mutationFn: async (data: FormData) => {
+      const req = await api.put(`/api/category/${id}`, data);
+      return req.data;
+    },
     onMutate: async (updateCategory) => {
       await queryClient.cancelQueries({
         queryKey: ["category", "crud"],
@@ -55,7 +72,7 @@ export function useUpdateCategory() {
             return {
               ...oldData,
               data: oldData.data.map((category) =>
-                category.id === updateCategory.id
+                category.id === id
                   ? { ...category, ...updateCategory }
                   : category
               ),
@@ -70,7 +87,7 @@ export function useUpdateCategory() {
     },
 
     // On Successful Update
-    onSuccess: (serverResponse, updateCategory) => {
+    onSuccess: (serverResponse) => {
       toast.success("Update Categories Success");
 
       // Update the query cache with the server's response
@@ -81,7 +98,7 @@ export function useUpdateCategory() {
             return {
               ...oldData,
               data: oldData.data.map((category) =>
-                category.id === updateCategory.id ? serverResponse : category
+                category.id === id ? serverResponse : category
               ),
             };
           }
@@ -117,7 +134,10 @@ export function useDeleteCategory() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["category", "crud"],
-    mutationFn: (categoryId: string) => category.Delete(categoryId),
+    mutationFn: async (categoryId: string) => {
+      const req = await api.delete(`/api/category/${categoryId}`);
+      return req.data;
+    },
     onSuccess: () => {
       toast.success("Delete Categories success");
       queryClient.invalidateQueries({ queryKey: ["category", "crud"] }); // Fix the query key to match

@@ -23,7 +23,7 @@ export function LoginPage() {
     formState: { errors },
   } = useForm<InitialDataLogin>({
     defaultValues: {
-      name: "",
+      email: "",
       password: "",
     },
   });
@@ -55,7 +55,7 @@ export function LoginPage() {
                 id="name"
                 type="string"
                 placeholder="Enter your name"
-                {...register("name")}
+                {...register("email")}
                 className={cn(
                   "text-white placeholder:pl-2",
                   errors && "border-red-500 focus:ring-red-500"

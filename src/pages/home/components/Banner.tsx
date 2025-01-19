@@ -54,7 +54,7 @@ export default function Banner() {
               currentSlide === index ? "opacity-100" : "opacity-0"
             }`}>
             {/* Background Image */}
-            <div className="relative w-full h-full mt-[60px]">
+            <div className="relative w-full h-full ">
               <img
                 src={slide.image}
                 alt={`Slide ${index + 1}`}

@@ -12,7 +12,15 @@ interface CartState {
   setSize: (size: string) => void;
   setPrice: (price: number) => void;
   reset: () => void;
-  updateItemQuantity: (id: string, quantity: number) => void;
+  updateItemQuantity: (
+    itemId: string,
+    size: string,
+    type: "increase" | "decrease"
+  ) => void;
+  setInitialItems: (items: CartItem[]) => void;
+  getTotalQuantity: () => number;
+  getTotalPrice: () => number;
+  getItemQuantity: (itemId: string, size: string) => number;
 }
 
 export const useCart = create<CartState>((set, get) => ({
@@ -22,28 +30,59 @@ export const useCart = create<CartState>((set, get) => ({
   size: "",
   items: [],
 
-  updateItemQuantity: (id: string, quantity: number) =>
+  getTotalQuantity: () => {
+    const state = get();
+    return state.items.reduce((sum, item) => sum + item.quantity, 0);
+  },
+
+  getTotalPrice: () => {
+    const state = get();
+    return state.items.reduce((sum, item) => sum + item.subTotal, 0);
+  },
+
+  getItemQuantity: (itemId: string, size: string) => {
+    const state = get();
+    const item = state.items.find(
+      (item) => item.id === itemId && item.size === size
+    );
+    return item?.quantity || 0;
+  },
+  setInitialItems: (items: CartItem[]) =>
+    set(() => ({
+      items,
+      count: items.reduce((sum, item) => sum + item.quantity, 0),
+      total: items.reduce((sum, item) => sum + item.subTotal, 0),
+    })),
+
+  updateItemQuantity: (
+    itemId: string,
+    size: string,
+    type: "increase" | "decrease"
+  ) =>
     set((state) => {
+      const itemToUpdate = state.items.find(
+        (item) => item.id === itemId && item.size === size
+      );
+
+      if (!itemToUpdate) return state;
+
+      const newQuantity =
+        type === "increase"
+          ? Math.min(itemToUpdate.quantity + 1, 10)
+          : Math.max(itemToUpdate.quantity - 1, 1);
+
       const updatedItems = state.items.map((item) =>
-        item.id === id
+        item.id === itemId && item.size === size
           ? {
               ...item,
-              quantity,
-              subTotal: (item.variant.product.price || 0) * quantity,
+              quantity: newQuantity,
+              subTotal: newQuantity * (item.variant.product.price || 0),
             }
           : item
       );
 
-      const newTotal = updatedItems.reduce(
-        (sum, item) => sum + item.subTotal,
-        0
-      );
-
       return {
         items: updatedItems,
-        total: newTotal,
-        count: quantity,
-        price: state.price,
       };
     }),
 

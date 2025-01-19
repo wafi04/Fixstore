@@ -3,20 +3,23 @@ import { ReactNode } from "react";
 
 import { motion } from "framer-motion";
 import { DynamicBreadcrumb } from "./DynamicBreadcumb";
+import { cn } from "@/lib/utils";
 
 interface HeaderDashboardProps {
   title: string;
   subTitle: string;
   children?: ReactNode;
+  className?: string;
 }
 
 export function HeaderDashboard({
   subTitle,
   title,
   children,
+  className,
 }: HeaderDashboardProps) {
   return (
-    <section className="w-full bg-white/60 backdrop-blur-sm ">
+    <section className={cn(`w-full bg-white/60 backdrop-blur-sm `, className)}>
       <div className="flex justify-between items-center">
         <motion.div
           initial={{ opacity: 0, x: -20 }}

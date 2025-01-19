@@ -1,7 +1,6 @@
 "use client";
 import { BASE_URL } from "@/constants";
 import { InitialDataLogin, InitialDataRegister } from "@/schema/auth";
-import { isValidEmail } from "@/types/auth";
 import { ErrorResponse } from "@/types/interfaces";
 import { Api } from "@/utils/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -9,56 +8,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 const api = new Api();
-
-const register = async (data: InitialDataRegister) => {
-  if (data.name.length < 2) {
-    throw new Error("Name must be at least 2 characters long");
-  }
-  if (data.password.length < 8) {
-    throw new Error("Password must be at least 8 characters long");
-  }
-  if (!isValidEmail(data.email)) {
-    throw new Error("Please enter a valid email");
-  }
-  const response = await fetch(`${BASE_URL}/auth/register`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify({
-      name: data.name,
-      email: data.email,
-      password: data.password,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error("Registration failed");
-  }
-
-  return response.json();
-};
-
-// const refreshToken = async () => {
-//   try {
-//     const response = await fetch(`${BASE_URL}/auth/refresh`, {
-//       method: "POST",
-//       credentials: "include",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//     });
-
-//     if (!response.ok) {
-//       throw new Error("Token refresh failed");
-//     }
-
-//     return response.json();
-//   } catch (error) {
-//     throw error;
-//   }
-// };
 
 export function useHandleLogout() {
   const queryClient = useQueryClient();
@@ -96,7 +45,11 @@ export const useRegisterMutation = () => {
   const router = useNavigate();
   return useMutation({
     mutationKey: ["register"],
-    mutationFn: register,
+    mutationFn: async (data: InitialDataRegister) => {
+      const req = await api.post("/auth/register", data);
+
+      return req.data;
+    },
     onError: (err: ErrorResponse) => {
       queryClient.cancelQueries({ queryKey: ["user"] });
       toast.error(err.message);
@@ -116,9 +69,24 @@ export const useLoginMutation = () => {
   return useMutation({
     mutationKey: ["login"],
     mutationFn: async (data: InitialDataLogin) => {
-      const response = await api.post(`/auth/login`, data);
+      const response = await fetch(`${BASE_URL}/auth/login`, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-      return response.data;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Logout failed");
+      }
+
+      const resp = await response.json();
+
+      localStorage.setItem("token", resp.data.access_token);
+
+      return resp;
     },
     onError: (error: ErrorResponse) => {
       const errorMessage =

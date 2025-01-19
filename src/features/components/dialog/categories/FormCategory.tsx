@@ -19,14 +19,12 @@ import {
 } from "@/features/api/categories/category.query";
 import { FormInput } from "@/components/ui/FormInput";
 
-export type CATEGORY_STEP = "Basic Information" | "Meta Information" | "Image";
 export function FormCategory({
   initialData,
   title,
   subTitle,
   open,
   onClose,
-  parentId,
 }: {
   initialData?: CategoryUpdate;
   title: string;
@@ -37,7 +35,7 @@ export function FormCategory({
 }) {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(
-    (initialData?.image as string) || null
+    (initialData?.image as string) || ""
   );
 
   const {
@@ -48,21 +46,20 @@ export function FormCategory({
     defaultValues: {
       name: initialData?.name || "",
       description: initialData?.description || "",
-      image: initialData?.image || null,
-      metaDescription: initialData?.metaDescription || "",
-      metaTitle: initialData?.metaTitle || "",
-      parentId: parentId,
+      images: null,
     },
   });
 
   const create = useCreateCategory();
-  const update = useUpdateCategory();
+  const update = useUpdateCategory(initialData?.id as string);
   const disabledButton = initialData ? update.isPending : create.isPending;
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    console.log(file);
     if (file) {
       setImageFile(file);
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -70,19 +67,27 @@ export function FormCategory({
       reader.readAsDataURL(file);
     }
   };
-
   const onSubmit = async (data: CategoryForm) => {
-    if (initialData) {
-      update.mutate({
-        ...data,
-        id: initialData.id,
-        image: imageFile,
-      });
-    } else {
-      create.mutate({
-        ...data,
-        image: imageFile,
-      });
+    try {
+      const formData = new FormData();
+
+      const payload = {
+        name: data.name,
+        description: data.description,
+      };
+
+      formData.append("payload", JSON.stringify(payload));
+
+      if (data.images || imageFile) {
+        formData.append("images", imageFile as File, imageFile?.name);
+      }
+      if (initialData) {
+        update.mutate(formData);
+      } else {
+        create.mutate(formData);
+      }
+    } catch (error) {
+      console.error("Form submission error:", error);
     }
   };
 
@@ -99,7 +104,6 @@ export function FormCategory({
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Basic Information */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Basic Information</h3>
                 <FormInput
                   label="Name"
                   id="name"
@@ -126,39 +130,6 @@ export function FormCategory({
                   })}
                   error={errors.description}
                   placeholder="Category Description"
-                />
-              </div>
-
-              {/* Meta Information */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Meta Information</h3>
-                <FormInput
-                  label="Meta Title"
-                  id="metaTitle"
-                  register={register("metaTitle", {
-                    required: "Meta Title is required",
-                    minLength: {
-                      value: 2,
-                      message: "Meta Title must be at least 2 characters",
-                    },
-                  })}
-                  error={errors.metaTitle}
-                  placeholder="Category Meta Title"
-                />
-
-                <FormInput
-                  label="Meta Description"
-                  id="metaDescription"
-                  register={register("metaDescription", {
-                    required: "Meta Description is required",
-                    minLength: {
-                      value: 10,
-                      message:
-                        "Meta Description must be at least 10 characters",
-                    },
-                  })}
-                  error={errors.metaDescription}
-                  placeholder="Category Meta Description"
                 />
               </div>
 

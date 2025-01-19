@@ -2,7 +2,7 @@ import { HandleCreateProduct } from "@/features/components/dialog/product/Handle
 import { ProductsSectionDashboard } from "@/pages/dashboard/products/Products";
 import { HeaderDashboard } from "@/layouts/header/HeaderDashboard";
 
-export function ProductsDAshoard() {
+export function ProductsDashoard() {
   return (
     <>
       <HeaderDashboard

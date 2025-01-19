@@ -13,12 +13,18 @@ export class Api {
   constructor() {
     this.instance = axios.create({
       baseURL: BASE_URL,
-      withCredentials: true,
       headers: {
         "Content-Type": "application/json",
       },
     });
 
+    this.instance.interceptors.request.use((config) => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`; // Hapus spasi sebelum Authorization
+      }
+      return config;
+    });
     this.instance.interceptors.response.use(
       (response) => response,
       (error: AxiosError) => {

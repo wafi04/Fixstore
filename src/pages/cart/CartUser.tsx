@@ -1,4 +1,3 @@
-"use client";
 import { useGetCart, useRemoveCartItems } from "@/features/api/cart/cart";
 import { LayoutsWithHeaderAndFooter } from "@/providers/NavbarAndFooter";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,27 +6,35 @@ import { FormatPrice } from "@/utils/FormatPrice";
 import { CartItem } from "@/types/cart";
 import { CartProcessed } from "./CartProcessed";
 import { useCart } from "@/hooks/cart/useCart";
+import { useEffect } from "react";
+import { useAuth } from "@/hooks/auth/userAuthStore";
 
 export function CartUserPage() {
-  const { data } = useGetCart();
+  const { cart } = useGetCart();
   const removeCartItms = useRemoveCartItems();
-  console.log(data);
-  const { updateItemQuantity, count, total } = useCart();
+  const { user } = useAuth();
+  const {
+    updateItemQuantity,
+    setInitialItems,
+    getItemQuantity,
+    getTotalPrice,
+  } = useCart();
+
+  useEffect(() => {
+    if (cart && cart.items) {
+      setInitialItems(cart.items);
+    }
+  }, [setInitialItems, cart]);
 
   const handleCount = (
     type: "decrease" | "increase",
-    itemId: string,
-    currentQuantity: number
+    size: string,
+    itemId: string
   ) => {
-    const newQuantity: number =
-      type === "increase"
-        ? currentQuantity + 1
-        : Math.max(currentQuantity - 1, 0);
-    console.log(newQuantity);
-    updateItemQuantity(itemId, newQuantity);
+    updateItemQuantity(itemId, size, type);
   };
 
-  if (!data || !data.items || data.items.length === 0) {
+  if (!cart || !cart.items || cart.items.length === 0) {
     return (
       <LayoutsWithHeaderAndFooter className="mt-20">
         <div className="flex flex-col items-center justify-center min-h-[60vh]">
@@ -47,10 +54,9 @@ export function CartUserPage() {
         <h1 className="text-2xl font-bold mb-8">Shopping Cart</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Cart Items Section */}
           <div className="lg:col-span-2">
-            {data.items.map((item: CartItem) => (
-              <Card key={item.id} className="mb-4">
+            {cart.items.map((item: CartItem) => (
+              <Card key={`${item.id}-${item.size}`} className="mb-4">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
                     <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -88,21 +94,26 @@ export function CartUserPage() {
                         <div className="flex items-center gap-4">
                           <button
                             onClick={() =>
-                              handleCount("decrease", item.id, item.quantity)
+                              handleCount("decrease", item.size, item.id)
                             }
                             className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-50">
                             -
                           </button>
-                          <span>{count}</span>
+                          <span>{getItemQuantity(item.id, item.size)}</span>
                           <button
                             onClick={() =>
-                              handleCount("increase", item.id, item.quantity)
+                              handleCount("increase", item.size, item.id)
                             }
                             className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-50">
                             +
                           </button>
                         </div>
-                        <p className="font-semibold">{FormatPrice(total)}</p>
+                        <p className="font-semibold">
+                          {FormatPrice(
+                            item.variant.product.price *
+                              getItemQuantity(item.id, item.size)
+                          )}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -110,7 +121,14 @@ export function CartUserPage() {
               </Card>
             ))}
           </div>
-          <CartProcessed total={data.total} />
+          <CartProcessed
+            total={getTotalPrice()}
+            customerDetails={{
+              email: user?.email as string,
+              name: user?.name as string,
+              phone: "900000",
+            }}
+          />
         </div>
       </div>
     </LayoutsWithHeaderAndFooter>

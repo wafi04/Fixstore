@@ -1,7 +1,7 @@
 "use client";
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronDown, ChevronRight, Image as ImageIcon } from "lucide-react";
+import { Image as ImageIcon } from "lucide-react";
 import { CategoryData } from "@/types/categories";
 import { HandleOther } from "../../../features/components/dialog/categories/HandleActionsCategory";
 import { useGetCategory } from "@/features/api/categories/category.query";
@@ -44,16 +44,12 @@ export function CategoriesDataPage() {
 
 const CategoryCard = ({
   category,
-  depth,
   isChildren,
 }: {
   category: CategoryData;
   depth: number;
   isChildren: boolean;
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const hasChildren = category.children && category.children.length > 0;
-
   return (
     <>
       <Card
@@ -62,26 +58,11 @@ const CategoryCard = ({
         } hover:shadow-lg transition-all`}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3">
           <CardTitle className="text-lg font-medium flex items-center justify-between w-full">
-            <div className="flex items-center gap-2 ">
-              {hasChildren && (
-                <button
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="focus:outline-none hover:bg-gray-100 rounded-full p-1">
-                  {isExpanded ? (
-                    <ChevronDown className="w-4 h-4" />
-                  ) : (
-                    <ChevronRight className="w-4 h-4" />
-                  )}
-                </button>
-              )}
-              {category.name}
-            </div>
+            <div className="flex items-center gap-2 ">{category.name}</div>
             <HandleOther
               id={category.id}
               description={category.description}
               image={category.image as string}
-              metaDescription={category.metaDescription}
-              metaTitle={category.metaTitle}
               name={category.name}
             />
           </CardTitle>
@@ -108,32 +89,10 @@ const CategoryCard = ({
               <p className="text-sm text-gray-500">
                 {category.description || "-"}
               </p>
-              {category.metaTitle && (
-                <p className="text-xs text-gray-400">
-                  Meta Title: {category.metaTitle}
-                </p>
-              )}
-              {category.metaDescription && (
-                <p className="text-xs text-gray-400">
-                  Meta Desc: {category.metaDescription}
-                </p>
-              )}
             </div>
           </div>
         </CardContent>
       </Card>
-      {isExpanded && hasChildren && (
-        <div className="pl-4 space-y-4 mt-4">
-          {category.children!.map((childCategory) => (
-            <CategoryCard
-              key={childCategory.id}
-              isChildren={true}
-              category={childCategory}
-              depth={depth + 1}
-            />
-          ))}
-        </div>
-      )}
     </>
   );
 };

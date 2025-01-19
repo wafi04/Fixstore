@@ -15,27 +15,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { CategoryForm } from "@/types/categories";
+import { CategoryUpdate } from "@/types/categories";
 import { FormCategory } from "./FormCategory";
 import { useDeleteCategory } from "@/features/api/categories/category.query";
 
-export function HandleOther(initialData: CategoryForm) {
+export function HandleOther(initialData: CategoryUpdate) {
   const [openUpdate, setOpenUpdate] = useState(false);
-  const [openAddMore, setOpenAddMore] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const deletes = useDeleteCategory();
-  const handleOpen = useCallback(
-    (open: boolean, type: "delete" | "update" | "AddMore") => {
-      if (type === "delete") {
-        setOpenDelete(!open);
-      } else if (type === "update") {
-        setOpenUpdate(!open);
-      } else {
-        setOpenAddMore(!open);
-      }
-    },
-    []
-  );
+  const handleOpen = useCallback((open: boolean, type: "delete" | "update") => {
+    if (type === "delete") {
+      setOpenDelete(!open);
+    } else {
+      setOpenUpdate(!open);
+    }
+  }, []);
 
   const handleDelete = () => {
     if (initialData && initialData.id) {
@@ -57,9 +51,6 @@ export function HandleOther(initialData: CategoryForm) {
           <DropdownMenuItem onClick={() => handleOpen(openUpdate, "update")}>
             Update
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleOpen(openAddMore, "AddMore")}>
-            Add More Categories
-          </DropdownMenuItem>
           <DropdownMenuItem disabled={deletes.isPending} onClick={handleDelete}>
             Delete
           </DropdownMenuItem>
@@ -80,23 +71,6 @@ export function HandleOther(initialData: CategoryForm) {
               title="Update Categories"
               subTitle=""
               initialData={initialData}
-            />
-          </DialogContent>
-        </Dialog>
-      )}
-      {openAddMore && (
-        <Dialog open={openAddMore} onOpenChange={() => setOpenAddMore(false)}>
-          <DialogContent>
-            <DialogHeader className="border-b-2 pb-2">
-              <DialogTitle>Add More Categorys</DialogTitle>
-              <DialogDescription>Add More form category</DialogDescription>
-            </DialogHeader>
-            <FormCategory
-              onClose={() => setOpenAddMore(false)}
-              open={openAddMore}
-              title="Add More Sub Categories"
-              subTitle=""
-              parentId={initialData.id}
             />
           </DialogContent>
         </Dialog>

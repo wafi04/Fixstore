@@ -1,4 +1,4 @@
-import { Children, ReactNode, Fragment } from "react";
+import { Children, ReactNode } from "react";
 
 interface EachUtilsProps<T> {
   of: T[];
@@ -6,7 +6,5 @@ interface EachUtilsProps<T> {
 }
 
 export default function EachUtils<T>({ of, render }: EachUtilsProps<T>) {
-  return (
-    <>{Children.toArray(of.map((item, index) => render(item, index)))}</>
-  );
+  return <>{Children.toArray(of.map((item, index) => render(item, index)))}</>;
 }

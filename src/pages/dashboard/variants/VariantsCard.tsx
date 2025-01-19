@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/carousel";
 import { VariantsData } from "@/types/variants";
 import { ColorDisplay } from "@/utils/ColorsDetails";
-import { ButtonDialogVariants } from "../../dialog/variants/ButtonDialogVariants";
+import { ButtonDialogVariants } from "@/features/components/dialog/variants/ButtonDialogVariants";
 
 export function VariantsCard({ data }: { data: VariantsData }) {
   return (

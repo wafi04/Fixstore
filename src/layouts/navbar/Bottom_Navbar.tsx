@@ -4,6 +4,7 @@ import { UserData } from "@/types/user";
 import { Bell, ShoppingBag } from "lucide-react";
 import HeaderDropdown from "./HeaderDropdown";
 import { Link } from "react-router-dom";
+import { useGetCountCart } from "@/features/api/cart/cart";
 
 interface BottomNavbarProps {
   user: UserData;
@@ -11,6 +12,9 @@ interface BottomNavbarProps {
   categories: CategoryData[];
 }
 export function BottomNavbar({ categories }: BottomNavbarProps) {
+  const count = useGetCountCart();
+
+  console.log(count);
   return (
     <div className="flex justify-between items-center mx-4 md:mx-10 ">
       <Link
@@ -38,10 +42,14 @@ export function BottomNavbar({ categories }: BottomNavbarProps) {
           to="/cart"
           className="relative hover:text-primary transition-colors">
           <ShoppingBag className="w-6 h-6" />
-          <Badge
-            variant="destructive"
-            className="absolute -top-2 -right-2 px-2 py-0.5 text-xs"></Badge>
-          {/* )} */}
+
+          {count && count.count > 0 && (
+            <Badge
+              variant="destructive"
+              className="absolute rounded-full -top-2 -right-2 px-2 py-0.5 text-xs">
+              {count.count}
+            </Badge>
+          )}
         </Link>
         <Link
           to="/dashboard/notifications"

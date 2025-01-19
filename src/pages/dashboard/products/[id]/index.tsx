@@ -1,10 +1,10 @@
 import { useGetAllVariantsByProduct } from "@/features/api/variants/variants.query";
 import { ButtonCreate } from "@/features/components/dialog/variants/ButtonCreate";
-import { VariantsCard } from "@/features/components/styling/variants/VariantsCard";
 import { HeaderDashboard } from "@/layouts/header/HeaderDashboard";
 import { VariantsData } from "@/types/variants";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
+import { VariantsCard } from "../../variants/VariantsCard";
 
 export function ProductById() {
   const { id } = useParams();
